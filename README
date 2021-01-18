@@ -1,7 +1,3 @@
-Name: Jingkai Hong
-
-USCID: 6334949156
-
 What I've done: implemented a distributed system to compute the shortest path based on client’s query
 
 Functionality of each file: 
