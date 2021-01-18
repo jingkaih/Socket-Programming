@@ -1,0 +1,146 @@
+Name: Jingkai Hong
+
+USCID: 6334949156
+
+What I've done: implemented a distributed system to compute the shortest path based on client’s query
+
+Functionality of each file: 
+client.cpp:
+1. create a query
+2. display the result to user
+aws.cpp:
+1. receive the query from client.
+2. send graph seeking query to server A and B.
+3. check if vertices are in the graph and notify the client if they aren't.
+4. send query and map details to server C.
+5. relay the result from server C to the client.
+serverA.cpp
+1. receive the query from aws
+2. check if the required graph is in map1.txt
+serverB.cpp
+1. receive the query from aws
+2. check if the required graph is in map2.txt
+serverC.cpp
+1. find the shortest path
+2. calculate the delay
+makefile
+1. make all: generate 5 executable files
+2. make aws: run aws
+3. make serverA: run server A
+4. make serverB: run server B
+5. make serverC: run server C
+6. make clean: remove all executable files
+
+
+The format of all the messages exchanged:
+client-to-aws(query):
+"<map_id>#<source>#<destination>#<file_size>"
+(e.g. "A#1#2#1024")
+
+aws-to-serverA/B(query):
+"<map_id>"
+(e.g. "w")
+
+serverA/B-to-aws(no such map):
+"n"
+
+serverA/B-to-aws(map details):
+"<propagation speed>
+<transmission speed>
+<v1> <v2> <dist>
+<v2> <v3> <dist>
+.
+.
+.
+<v46> <v47> <dist>
+<v48> <v49> <dist>"
+(e.g.
+"117027.48
+525296
+76 53 1301.90
+76 22 4755.30
+53 22 4254.02"
+)
+
+aws-to-serverC(map details):
+"<map_id> <source> <destination> <file_size>
+<propagation speed>
+<transmission speed>
+<v1> <v2> <dist>
+<v2> <v3> <dist>
+.
+.
+.
+<v46> <v47> <dist>
+<v48> <v49> <dist>"
+(e.g.
+"I 73 22 1024
+117027.48
+525296
+76 53 1301.90
+76 22 4755.30
+53 22 4254.02"
+)
+
+serverC-to-aws(calculation result)
+"<path_length>
+<transmission_delay>
+<propagation_delay>
+<overall_delay>
+<source>
+<next_node>
+<next_node>
+.
+.
+.
+<next_node>
+<destination>"
+(e.g.
+"6136.340000
+0.011781
+0.028057
+0.039838
+85
+91
+30
+23")
+
+aws-to-client(couldn't find source in the graph)
+"s"
+
+aws-to-client(couldn't find destination in the graph)
+"d"
+
+aws-to-client(couldn't find source and destination in the graph)
+"b"
+
+aws-to-client(calculation result)
+"<path_length>
+<transmission_delay>
+<propagation_delay>
+<overall_delay>
+<source>
+<next_node>
+<next_node>
+.
+.
+.
+<next_node>
+<destination>"
+(e.g.
+"6136.340000
+0.011781
+0.028057
+0.039838
+85
+91
+30
+23")
+
+Idiosyncrasy of my project:
+When the arguments input from command line exceed the pre-defined length, it fails.
+When the graph stored in txt file is in any format that differs from the example, it fails.
+No error reporting if NOS fails to create socket or something goes wrong with NOS.
+
+Reused code:
+Every part of my code that filling the struct "sockaddr_in" was from Beej's guildline.
